@@ -1,5 +1,6 @@
 import sha1 from 'sha1';
 import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 class UsersController {
   static async postNew(request, response) {
@@ -28,6 +29,30 @@ class UsersController {
     } catch (error) {
       return response.status(500).json({ error: 'Internal serber error' });
     }
+  }
+
+  static async getMe(request, response) {
+    const token = request.headers['x-token'];
+
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await dbClient.db.collection('users')
+      .findOne({ _id: dbClient.ObjectId(userId) });
+
+    if (!user) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    return response.status(200).json({ id: user._id, email: user.email });
   }
 }
 

@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 class DBClient {
   constructor() {
@@ -8,6 +8,8 @@ class DBClient {
     const uri = `mongodb://${host}:${port}/${database}`;
 
     this.client = new MongoClient(uri, { useUnifiedTopology: true });
+    this.db = null;
+    this.ObjectId = ObjectId;
 
     this.connected = false;
 
