@@ -181,10 +181,87 @@ class FileController {
 
   // putPublish endpoint
   static async putPublish(request, response) {
+    const token = request.headers['x-token'];
+
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const fileId = request.params.id;
+
+    const file = await dbClient.db.collection('files').findOne({
+      _id: dbClient.ObjectId(fileId),
+      userId: dbClient.ObjectId(userId),
+    });
+
+    if (!file) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    await dbClient.db.collection('files').updateOne(
+      { _id: dbClient.ObjectId(fileId) },
+      { $set: { isPublic: true } },
+    );
+
+    file.isPublic = true;
+    return response.status(200).json({
+      id: file._id.toString(),
+      userId: file.userId.toString(),
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId.toString(),
+    });
   }
 
   // putUnPublish endpoint
-  static async putUnPublish(request, response) {}
+  static async putUnPublish(request, response) {
+    const token = request.headers['x-token'];
+
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const fileId = request.params.id;
+
+    const file = await dbClient.db.collection('files').findOne({
+      _id: dbClient.ObjectId(fileId),
+      userId: dbClient.ObjectId(userId),
+    });
+
+    if (!file) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    await dbClient.db.collection('files').updateOne(
+      { _id: dbClient.ObjectId(fileId) },
+      { $set: { isPublic: false } },
+    );
+
+    file.isPublic = false;
+    return response.status(200).json({
+      id: file._id.toString(),
+      userId: file.userId.toString(),
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId.toString(),
+    });
+  }
 }
 
 export default FileController;
