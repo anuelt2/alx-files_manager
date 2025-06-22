@@ -21,7 +21,8 @@ class FileController {
       return response.status(401).json({ error: 'Unauthorized' });
     }
 
-    const user = await dbClient.db.collection('users')
+    const user = await dbClient.db
+      .collection('users')
       .findOne({ _id: dbClient.ObjectId(userId) });
 
     if (!user) {
@@ -51,7 +52,8 @@ class FileController {
     }
 
     if (parentId !== 0) {
-      const parentFile = await dbClient.db.collection('files')
+      const parentFile = await dbClient.db
+        .collection('files')
         .findOne({ _id: dbClient.ObjectId(parentId) });
 
       if (!parentFile) {
@@ -89,6 +91,89 @@ class FileController {
       isPublic,
       parentId,
     });
+  }
+
+  static async getShow(request, response) {
+    const token = request.headers['x-token'];
+
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const fileId = request.params.id;
+
+    const file = await dbClient.db.collection('files').findOne({
+      _id: dbClient.ObjectId(fileId),
+      userId: dbClient.ObjectId(userId),
+    });
+
+    if (!file) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    return response.status(200).json({
+      id: file._id.toString(),
+      userId: file.userId.toString(),
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId.toString(),
+    });
+  }
+
+  static async getIndex(request, response) {
+    const token = request.headers['x-token'];
+
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const parentId = request.query.parentId || 0;
+    const page = parseInt(request.query.page, 10) || 0;
+
+    const query = { userId: dbClient.ObjectId(userId) };
+
+    if (parentId !== 0) {
+      if (dbClient.ObjectId.isValid(parentId)) {
+        query.parentId = dbClient.ObjectId(parentId);
+      } else {
+        return response.status(200).json([]);
+      }
+    } else {
+      query.parentId = 0;
+    }
+
+    const files = await dbClient.db.collection('files')
+      .aggregate([
+        { $match: query },
+        { $skip: page * 20 },
+        { $limit: 20 },
+      ]).toArray();
+
+    const formattedFiles = files.map((file) => ({
+      id: file._id.toString(),
+      userId: file.userId.toString(),
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId.toString(),
+    }));
+
+    return response.status(200).json(formattedFiles);
   }
 }
 
