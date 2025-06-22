@@ -7,6 +7,7 @@ import dbClient from '../utils/db';
 const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
 
 class FileController {
+  // postUpload endpoint
   static async postUpload(request, response) {
     const token = request.headers['x-token'];
 
@@ -93,6 +94,7 @@ class FileController {
     });
   }
 
+  // getShow endpoint
   static async getShow(request, response) {
     const token = request.headers['x-token'];
 
@@ -104,6 +106,14 @@ class FileController {
     const userId = await redisClient.get(key);
 
     if (!userId) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await dbClient.db
+      .collection('users')
+      .findOne({ _id: dbClient.ObjectId(userId) });
+
+    if (!user) {
       return response.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -128,6 +138,7 @@ class FileController {
     });
   }
 
+  // getIndex endpoint
   static async getIndex(request, response) {
     const token = request.headers['x-token'];
 
@@ -175,6 +186,13 @@ class FileController {
 
     return response.status(200).json(formattedFiles);
   }
+
+  // putPublish endpoint
+  static async putPublish(request, response) {
+  }
+
+  // putUnPublish endpoint
+  static async putUnPublish(request, response) {}
 }
 
 export default FileController;
