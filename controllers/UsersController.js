@@ -1,8 +1,10 @@
 import sha1 from 'sha1';
+import Queue from 'bull';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 class UsersController {
+  // postNew endpoint
   static async postNew(request, response) {
     const { email, password } = request.body || {};
 
@@ -25,12 +27,17 @@ class UsersController {
       const result = await dbClient.db.collection('users')
         .insertOne({ email, password: hashedPassword });
 
+      // Create Bull queue for sending Welcome email to user
+      const userQueue = new Queue('userQueue');
+      await userQueue.add({ userId: result.insertedId.toString() });
+
       return response.status(201).json({ id: result.insertedId, email });
     } catch (error) {
-      return response.status(500).json({ error: 'Internal serber error' });
+      return response.status(500).json({ error: 'Internal server error' });
     }
   }
 
+  // getMe endpoint
   static async getMe(request, response) {
     const token = request.headers['x-token'];
 

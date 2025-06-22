@@ -37,4 +37,24 @@ fileQueue.process(async (job, done) => {
   done();
 });
 
-export default fileQueue;
+const userQueue = new Queue('userQueue');
+
+userQueue.process(async (job, done) => {
+  const { userId } = job.data;
+
+  if (!userId) {
+    done(new Error('Missing userId'));
+    return;
+  }
+
+  const user = await dbClient.db.collection('users')
+    .findOne({ _id: dbClient.ObjectId(userId) });
+
+  if (!user) {
+    done(new Error('User not found'));
+  }
+
+  console.log(`Welcome ${user.email}!`);
+
+  done();
+});
