@@ -142,7 +142,7 @@ class FileController {
       return response.status(401).json({ error: 'Unauthorized' });
     }
 
-    const parentId = request.query.parentId || 0;
+    const parentId = request.query.parentId || '0';
     const page = parseInt(request.query.page, 10) || 0;
 
     const query = { userId: dbClient.ObjectId(userId) };
@@ -154,7 +154,7 @@ class FileController {
         return response.status(200).json([]);
       }
     } else {
-      query.parentId = 0;
+      query.parentId = '0';
     }
 
     const files = await dbClient.db.collection('files')
