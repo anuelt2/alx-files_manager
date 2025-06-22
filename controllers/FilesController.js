@@ -109,14 +109,6 @@ class FileController {
       return response.status(401).json({ error: 'Unauthorized' });
     }
 
-    const user = await dbClient.db
-      .collection('users')
-      .findOne({ _id: dbClient.ObjectId(userId) });
-
-    if (!user) {
-      return response.status(401).json({ error: 'Unauthorized' });
-    }
-
     const fileId = request.params.id;
 
     const file = await dbClient.db.collection('files').findOne({
