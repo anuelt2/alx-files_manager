@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { promises as fs } from 'fs';
+import fs, { promises as fsPromises } from 'fs';
+import mime from 'mime-types';
 import path from 'path';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
@@ -75,11 +76,11 @@ class FileController {
     };
 
     if (newFile.type !== 'folder') {
-      await fs.mkdir(folderPath, { recursive: true });
+      await fsPromises.mkdir(folderPath, { recursive: true });
       const filename = uuidv4();
       const localPath = path.resolve(folderPath, filename);
 
-      await fs.writeFile(localPath, Buffer.from(data, 'base64'));
+      await fsPromises.writeFile(localPath, Buffer.from(data, 'base64'));
       newFile.localPath = localPath;
     }
 
@@ -261,6 +262,52 @@ class FileController {
       isPublic: file.isPublic,
       parentId: file.parentId.toString(),
     });
+  }
+
+  // getFile endpoint
+  static async getFile(request, response) {
+    const fileId = request.params.id;
+
+    const file = await dbClient.db.collection('files')
+      .findOne({ _id: dbClient.ObjectId(fileId) });
+
+    if (!file) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    if (!file.isPublic) {
+      const token = request.headers['x-token'];
+
+      if (!token) {
+        return response.status(404).json({ error: 'Not found' });
+      }
+
+      const key = `auth_${token}`;
+      const userId = await redisClient.get(key);
+
+      if (!userId || userId.toString() !== file.userId.toString()) {
+        return response.status(404).json({ error: 'Not found' });
+      }
+    }
+
+    if (file.type === 'folder') {
+      return response.status(400).json({ error: "A folder doesn't have content" });
+    }
+
+    if (!file.localPath) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    if (!fs.existsSync(file.localPath)) {
+      return response.status(404).json({ error: 'Not found' });
+    }
+
+    const fileMimeType = mime.lookup(file.name);
+
+    const fileContent = fs.readFileSync(file.localPath);
+
+    response.setHeader('Content-Type', fileMimeType);
+    return response.status(200).send(fileContent);
   }
 }
 
