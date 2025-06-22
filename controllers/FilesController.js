@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs, { promises as fsPromises } from 'fs';
 import mime from 'mime-types';
 import path from 'path';
+import Queue from 'bull';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
@@ -85,6 +86,16 @@ class FileController {
     }
 
     const result = await dbClient.db.collection('files').insertOne(newFile);
+
+    // Create Bull queue for image file type
+    if (type === 'image') {
+      const fileQueue = new Queue('fileQueue');
+      await fileQueue.add({
+        userId: userId.toString(),
+        fileId: result.insertedId.toString(),
+      });
+    }
+
     return response.status(201).json({
       id: result.insertedId,
       userId,
@@ -298,13 +309,21 @@ class FileController {
       return response.status(404).json({ error: 'Not found' });
     }
 
-    if (!fs.existsSync(file.localPath)) {
+    let filePath = file.localPath;
+
+    const { size } = request.query;
+
+    if (size && ['500', '250', '100'].includes(size)) {
+      filePath = `${file.localPath}_${size}`;
+    }
+
+    if (!fs.existsSync(filePath)) {
       return response.status(404).json({ error: 'Not found' });
     }
 
     const fileMimeType = mime.lookup(file.name);
 
-    const fileContent = fs.readFileSync(file.localPath);
+    const fileContent = fs.readFileSync(filePath);
 
     response.setHeader('Content-Type', fileMimeType);
     return response.status(200).send(fileContent);
