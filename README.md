@@ -130,3 +130,11 @@ Make sure MongoDB and Redis are running:
 npm install
 npm run test tests/
 ```
+
+---
+
+## Authors
+
+***Emmanuel Kwadwo Tettey***: [GitHub](https://github.com/anuelt2)
+
+***Abdul-Mumin Awinaba***: [GitHub](https://github.com/awinabaab)
