@@ -107,4 +107,15 @@ npm install chai-http@4.3.0 superagent@5.3.1 formidable@1.2.2
 | GET    | `/files/:id`                   | Get file metadata                           |
 | GET    | `/files/:id/data`              | Download file or image thumbnail            |
 | PUT    | `/files/:id/publish`           | Make file public                            |
-| PUT    | `/files/:id/unpublish`         | Make file private                 
+| PUT    | `/files/:id/unpublish`         | Make file private                  
+
+---
+
+## Thumbnails
+
+- Automatically generated for uploaded files of type `image`
+- Generated using the `image-thumbnail` module via a Bull background worker
+- Sizes created: `500px`, `250px`, `100px`
+- Stored alongside the original image in the local path specified by `FOLDER_PATH`
+- To retrieve a thumbnail:
+  **GET** `/files/:id/data?size=250`
