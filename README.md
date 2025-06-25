@@ -1,46 +1,15 @@
-# Backend Specialization Repo - Files Manager
+# Files Manager
 
-Welcome to my ALX Backend Specialization repository for File Manager project. ALX software engineering program.
+A scalable Node.js API that mimics basic cloud storage features like user registration, authentication, file uploading (including folders and images), access control, thumbnail generation, and more. Built with **Express**, **MongoDB**, **Redis**, **Bull**, and tested using **Mocha** and **Chai-HTTP**.
 
-## Description
+---
 
-This repository contains a project to build a simpe platform to upload and view files. Built from a collection of tasks that cover the following areas:
+## Features
 
-- User authentication via a token
-- List all files
-- Upload a new file
-- Change permission of a file
-- View a file
-- Generate thumbnails for images
-
-Technologies/tools/concepts involved:
-- Javascript
-- ES6
-- NoSQL
-- MongoDB
-- Redis
-- NodeJS
-- ExpressJS
-- Kue
-
-Objectives
-- How to create an API with Express
-- How to authenticate a user
-- How to store data in MongoDB
-- How to store temporary data in Redis
-- How to setup and use a background worker
-
-## Tasks
-
-0. Redis utils
-1. MongoDB utils
-2. First API
-3. Create a new user
-4. Authenticate a user
-5. First file
-6. Get and list file
-7. File publish/unpublish
-8. File data
-9. Image Thumbnails
-10. 
-11. 
+- User registration and authentication (Basic Auth + Redis sessions)
+- File and folder uploads with ownership and type validation
+- Public/private file toggling and secure access control
+- Image thumbnail generation via Bull queue and worker
+- Paginated file listing with filtering by parentId
+- MIME type-based file download with optional resizing
+- Mocha/Chai-HTTP tests for all modules and endpoints
