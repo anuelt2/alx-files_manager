@@ -35,7 +35,7 @@ Compatible with:
 
 ---
 
-##   Environment Variables
+## Environment Variables
 
 Create a `.env` file or export these:
 
@@ -50,3 +50,25 @@ Create a `.env` file or export these:
 | `FOLDER_PATH`    | Path for file storage                  | `/tmp/files_manager`   |
 
 ---
+
+## Installing dependencies and running the program
+Make sure MongoDB and Redis are running
+
+``` bash
+npm install
+npm run dev
+
+```
+
+---
+
+## Known Issues
+
+### Node 12 Compatibility
+
+If you see `Error: Cannot find module 'node:crypto'`, when you run `npm run dev`, downgrade these packages:
+
+```bash
+npm uninstall chai-http superagent formidable
+npm install chai-http@4.3.0 superagent@5.3.1 formidable@1.2.2
+```
