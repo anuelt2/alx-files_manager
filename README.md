@@ -32,3 +32,21 @@ Compatible with:
   - `"sha1": "^1.1.1"`
 - ***MongoDB***
 - ***Redis***
+
+---
+
+##   Environment Variables
+
+Create a `.env` file or export these:
+
+| Variable         | Description                            | Default                |
+|------------------|----------------------------------------|------------------------|
+| `PORT`           | Port API listens on                    | `5000`                 |
+| `DB_HOST`        | MongoDB hostname                       | `localhost`            |
+| `DB_PORT`        | MongoDB port                           | `27017`                |
+| `DB_DATABASE`    | MongoDB database name                  | `files_manager`        |
+| `REDIS_HOST`     | Redis hostname                         | `localhost`            |
+| `REDIS_PORT`     | Redis port                             | `6379`                 |
+| `FOLDER_PATH`    | Path for file storage                  | `/tmp/files_manager`   |
+
+---
