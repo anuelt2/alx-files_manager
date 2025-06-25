@@ -72,3 +72,39 @@ If you see `Error: Cannot find module 'node:crypto'`, when you run `npm run dev`
 npm uninstall chai-http superagent formidable
 npm install chai-http@4.3.0 superagent@5.3.1 formidable@1.2.2
 ```
+
+---
+
+## API Endpoints
+
+### System
+
+| Method | Endpoint    | Description                  |
+|--------|-------------|------------------------------|
+| GET    | `/status`   | Check MongoDB/Redis status   |
+| GET    | `/stats`    | Count of users/files         |
+
+### Users
+
+| Method | Endpoint     | Description                 |
+|--------|--------------|-----------------------------|
+| POST   | `/users`     | Register user               |
+| GET    | `/users/me`  | Get current user info       |
+
+### Auth
+
+| Method | Endpoint      | Description                    |
+|--------|---------------|--------------------------------|
+| GET    | `/connect`    | Login via Basic Auth           |
+| GET    | `/disconnect` | Logout with `X-Token` header   |
+
+### Files
+
+| Method | Endpoint                        | Description                                 |
+|--------|----------------------------------|---------------------------------------------|
+| POST   | `/files`                        | Upload folder/file/image                    |
+| GET    | `/files`                        | List user files with optional parentId/page |
+| GET    | `/files/:id`                   | Get file metadata                           |
+| GET    | `/files/:id/data`              | Download file or image thumbnail            |
+| PUT    | `/files/:id/publish`           | Make file public                            |
+| PUT    | `/files/:id/unpublish`         | Make file private                 
